@@ -8,6 +8,7 @@ repositories {
 
 dependencies {
     implementation platform('io.projectreactor:reactor-bom:2020.0.18')
+    implementation 'io.projectreactor.netty:reactor-netty'
     implementation 'io.projectreactor:reactor-core'
     implementation 'io.projectreactor:reactor-test'
 }

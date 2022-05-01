@@ -1,4 +1,6 @@
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
 import reactor.netty.ByteBufMono;
 import reactor.netty.DisposableServer;
 import reactor.netty.http.client.HttpClient;
@@ -12,10 +14,20 @@ import java.net.URISyntaxException;
 import java.util.Objects;
 
 public class ExampleWithIdeContext {
+    private static final Scheduler schedulerFromLib = Schedulers.boundedElastic();
+    private static final Scheduler schedulerCustom = Schedulers.newBoundedElastic(5, 10, "schedulerCustom");
+
     public static void main(String[] args) {
         DisposableServer disposableServer = HttpServer.create().route(httpServerRoutes -> {
             httpServerRoutes.get("/", (HttpServerRequest httpServerRequest, HttpServerResponse httpServerResponse) -> {
-                return httpServerResponse.status(200).sendString(Mono.just("hi"));
+                Mono<String> stringMono = Mono.fromCallable(() -> {
+                    // tangentially related, but not what i was going for...
+                    //noinspection BlockingMethodInNonBlockingContext
+                    Thread.sleep(100);
+                    return "hi";
+                }).subscribeOn(schedulerFromLib);
+
+                return httpServerResponse.status(200).sendString(stringMono);
             });
         }).bindNow();
 
@@ -27,7 +39,9 @@ public class ExampleWithIdeContext {
 
         Objects.requireNonNull(response);
         System.out.println(response);
-        assert response.getString().equals("hi");
+        if (!response.getString().equals("hi")) {
+            throw new AssertionError("expected 'hi', got: " + response.getString());
+        }
 
         disposableServer.disposeNow();
     }

@@ -19,7 +19,21 @@ public class ExampleWithIdeContext {
 
     public static void main(String[] args) {
         DisposableServer disposableServer = HttpServer.create().route(httpServerRoutes -> {
+            System.out.println("configuring routes");
             httpServerRoutes.get("/", (HttpServerRequest httpServerRequest, HttpServerResponse httpServerResponse) -> {
+                // issues warning, the expected way
+                //noinspection CallingSubscribeInNonBlockingScope
+                Mono.fromCallable(() -> 1).subscribe();
+
+                // no warning issued, also expected
+                Mono.fromCallable(() -> 1).subscribeOn(schedulerFromLib).subscribe();
+
+                // no warning issued, unlike the issue I thought I was seeing
+                Mono.fromCallable(() -> 1).subscribeOn(schedulerCustom).subscribe();
+
+                // the only real issue, no warning issued
+                Mono.fromCallable(() -> { Thread.sleep(100); return 1; }).subscribeOn(Schedulers.immediate()).subscribe();
+
                 Mono<String> stringMono = Mono.fromCallable(() -> {
                     // tangentially related, but not what i was going for...
                     //noinspection BlockingMethodInNonBlockingContext

@@ -43,8 +43,8 @@ public class SpringApp {
             Mono.fromCallable(() -> { Thread.sleep(100); return 1; }).subscribeOn(Schedulers.immediate()).subscribe();
 
             // Some hard coding going on here which does not make sense!
-            Mono.fromCallable(() -> { log.debug("good"); return repository.findAll(); }).subscribeOn(schedulerFromLib).subscribe();
-            Mono.fromCallable(() -> { log.debug("good"); return repository.findAll(); }).subscribeOn(schedulerCustom).subscribe();
+            Mono.fromCallable(() -> { log.debug("bad"); return repository.findAll(); }).subscribeOn(schedulerFromLib).subscribe();
+            Mono.fromCallable(() -> { log.debug("bad"); return repository.findAll(); }).subscribeOn(schedulerCustom).subscribe();
             Mono.fromCallable(() -> { log.debug("good"); return repository.findAll(); }).subscribeOn(Schedulers.boundedElastic()).subscribe();
 
             return Mono.just("hi");

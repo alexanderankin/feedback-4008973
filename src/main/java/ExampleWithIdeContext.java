@@ -17,6 +17,7 @@ public class ExampleWithIdeContext {
     private static final Scheduler schedulerFromLib = Schedulers.boundedElastic();
     private static final Scheduler schedulerCustom = Schedulers.newBoundedElastic(5, 10, "schedulerCustom");
 
+    @SuppressWarnings("DuplicatedCode") // for debugging the ide!
     public static void main(String[] args) {
         DisposableServer disposableServer = HttpServer.create().route(httpServerRoutes -> {
             System.out.println("configuring routes");
